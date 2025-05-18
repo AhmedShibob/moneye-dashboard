@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="120" height="32" viewBox="0 0 120 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Logo mark -->
+  <path d="M8 8C8 5.79086 9.79086 4 12 4H20C22.2091 4 24 5.79086 24 8V24C24 26.2091 22.2091 28 20 28H12C9.79086 28 8 26.2091 8 24V8Z" fill="#2563EB"/>
+  <path d="M12 12H20V16H12V12Z" fill="white"/>
+  <path d="M12 18H20V22H12V18Z" fill="white"/>
+  <path d="M14 8H18V24H14V8Z" fill="white"/>
+  
+  <!-- Moneye text -->
+  <path d="M8 8H12L16 20L20 8H24V24H20V14L16 24L12 14V24H8V8Z" fill="#2563EB"/>
+  <path d="M28 8H32V24H28V8Z" fill="#2563EB"/>
+  <path d="M36 8H40V24H36V8Z" fill="#2563EB"/>
+  <path d="M44 8H48V24H44V8Z" fill="#2563EB"/>
+  <path d="M52 8H56V24H52V8Z" fill="#2563EB"/>
+  <path d="M60 8H64V24H60V8Z" fill="#2563EB"/>
+  <path d="M68 8H72V24H68V8Z" fill="#2563EB"/>
+  <path d="M76 8H80V24H76V8Z" fill="#2563EB"/>
+  <path d="M84 8H88V24H84V8Z" fill="#2563EB"/>
+  <path d="M92 8H96V24H92V8Z" fill="#2563EB"/>
+  <path d="M100 8H104V24H100V8Z" fill="#2563EB"/>
+  <path d="M108 8H112V24H108V8Z" fill="#2563EB"/>
+</svg>
