@@ -214,7 +214,7 @@
 </template>
 
 <script lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, defineComponent } from 'vue'
 
 interface Merchant {
   id: string
@@ -223,9 +223,10 @@ interface Merchant {
   category: string
 }
 
-export default {
+export default defineComponent({
   name: 'MerchantsTable',
-  setup() {
+  emits: ['update:merchants'],
+  setup(props, { emit }) {
     const merchants = ref<Merchant[]>([
       {
         id: 'MCH001',
@@ -276,29 +277,30 @@ export default {
     const paginatedMerchants = computed(() => filteredMerchants.value.slice(startIndex.value, endIndex.value))
 
     const getCategoryClass = (category: string) => {
-      const classes = {
+      const classes: Record<string, string> = {
         'Shopping': 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
         'Food & Drink': 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
         'Transportation': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
         'Entertainment': 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300',
         'Utilities': 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
       }
-      return classes[category as keyof typeof classes] || 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
+      return classes[category] || 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
     }
 
-    const viewMerchant = (merchant: Merchant) => {
+    const viewMerchant = (merchant: Merchant): void => {
       console.log('View merchant:', merchant)
     }
 
-    const editMerchant = (merchant: Merchant) => {
+    const editMerchant = (merchant: Merchant): void => {
       editingMerchant.value = { ...merchant }
       showEditModal.value = true
     }
 
-    const saveMerchant = () => {
+    const saveMerchant = (): void => {
       const index = merchants.value.findIndex(m => m.id === editingMerchant.value.id)
       if (index !== -1) {
         merchants.value[index] = { ...editingMerchant.value }
+        emit('update:merchants', merchants.value)
       }
       showEditModal.value = false
     }
@@ -321,7 +323,7 @@ export default {
       saveMerchant
     }
   }
-}
+})
 </script>
 
 <style scoped>
