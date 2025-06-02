@@ -72,16 +72,23 @@
               <td class="px-5 py-4 sm:px-6">
                 <div class="flex items-center gap-2">
                   <button
+                    v-if="merchant.mergedMerchants && merchant.mergedMerchants.length > 0"
                     class="px-3 py-1 text-sm text-white rounded-lg bg-brand-500 hover:bg-brand-600"
                     @click="viewMerchant(merchant)"
                   >
-                    View
+                    View Merged ({{ merchant.mergedMerchants.length }})
                   </button>
                   <button
                     class="px-3 py-1 text-sm text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
                     @click="editMerchant(merchant)"
                   >
                     Edit
+                  </button>
+                  <button
+                    class="px-3 py-1 text-sm text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                    @click="selectForMerge(merchant)"
+                  >
+                    Merge
                   </button>
                 </div>
               </td>
@@ -158,7 +165,7 @@
   </div>
 
   <!-- Edit Merchant Modal -->
-  <div v-if="showEditModal" class="fixed inset-0 z-50 overflow-y-auto">
+  <div v-if="showEditModal" class="fixed inset-0 z-50 overflow-y-auto top-32">
     <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
       <div class="fixed inset-0 transition-opacity" aria-hidden="true">
         <div class="absolute inset-0 bg-gray-500 opacity-75 dark:bg-gray-900"></div>
@@ -211,6 +218,191 @@
       </div>
     </div>
   </div>
+
+  <!-- Merge Merchants Modal -->
+  <div v-if="showMergeModal" class="fixed inset-0 z-[100] overflow-y-auto top-32">
+    <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+      <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+        <div class="absolute inset-0 bg-gray-500 opacity-75 dark:bg-gray-900"></div>
+      </div>
+      <div class="relative inline-block overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl dark:bg-gray-800 sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+        <div class="px-4 pt-5 pb-4 bg-white dark:bg-gray-800 sm:p-6 sm:pb-4">
+          <div class="sm:flex sm:items-start">
+            <div class="w-full mt-3 text-center sm:mt-0 sm:text-left">
+              <h3 class="text-lg font-medium leading-6 text-gray-900 dark:text-gray-100">Merge Merchants</h3>
+              <div class="mt-4 space-y-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Selected Merchants</label>
+                  <div class="mt-2 space-y-2">
+                    <div 
+                      v-for="(merchant, index) in selectedMerchants" 
+                      :key="merchant.id" 
+                      class="flex items-center justify-between p-2 rounded-lg"
+                      :class="[
+                        index === 0 
+                          ? 'bg-brand-50 dark:bg-brand-900/20 border border-brand-200 dark:border-brand-800' 
+                          : 'bg-gray-50 dark:bg-gray-700'
+                      ]"
+                    >
+                      <div class="flex items-center gap-2">
+                        <span 
+                          class="text-gray-700 dark:text-gray-200"
+                          :class="{ 'font-medium': index === 0 }"
+                        >
+                          {{ merchant.name }}
+                          <span v-if="index === 0" class="ml-2 text-xs text-brand-600 dark:text-brand-400">(Parent)</span>
+                        </span>
+                        <span class="text-xs text-gray-500 dark:text-gray-400">({{ merchant.transactionCount }} transactions)</span>
+                      </div>
+                      <div class="flex items-center gap-2">
+                        <span
+                          class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium"
+                          :class="getCategoryClass(merchant.category)"
+                        >
+                          {{ merchant.category }}
+                        </span>
+                        <button
+                          v-if="index !== 0"
+                          @click="removeFromMerge(merchant)"
+                          class="text-red-500 hover:text-red-700"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Available Merchants</label>
+                  <div class="mt-2">
+                    <input
+                      type="text"
+                      v-model="availableMerchantsSearch"
+                      placeholder="Search merchants..."
+                      class="w-full mb-2 form-control"
+                    />
+                    <div class="space-y-2 overflow-y-auto max-h-48">
+                      <div 
+                        v-for="merchant in filteredAvailableMerchants" 
+                        :key="merchant.id" 
+                        class="flex items-center justify-between p-2 rounded-lg cursor-pointer bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600"
+                        @click="selectForMerge(merchant)"
+                      >
+                        <div class="flex items-center gap-2">
+                          <span class="text-gray-700 dark:text-gray-200">{{ merchant.name }}</span>
+                          <span class="text-xs text-gray-500 dark:text-gray-400">({{ merchant.transactionCount }} transactions)</span>
+                        </div>
+                        <span
+                          class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium"
+                          :class="getCategoryClass(merchant.category)"
+                        >
+                          {{ merchant.category }}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="px-4 py-3 bg-gray-50 dark:bg-gray-700 sm:px-6 sm:flex sm:flex-row-reverse">
+          <button
+            type="button"
+            class="inline-flex justify-center w-full px-4 py-2 text-base font-medium text-white border border-transparent rounded-md shadow-sm bg-brand-500 hover:bg-brand-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 sm:ml-3 sm:w-auto sm:text-sm"
+            @click="mergeMerchants"
+            :disabled="selectedMerchants.length < 2"
+          >
+            Merge
+          </button>
+          <button
+            type="button"
+            class="inline-flex justify-center w-full px-4 py-2 mt-3 text-base font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-700"
+            @click="closeMergeModal"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- View Merchant Modal -->
+  <div v-if="showViewModal" class="fixed inset-0 z-50 overflow-y-auto top-32">
+    <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+      <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+        <div class="absolute inset-0 bg-gray-500 opacity-75 dark:bg-gray-900"></div>
+      </div>
+      <div class="inline-block overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl dark:bg-gray-800 sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+        <div class="px-4 pt-5 pb-4 bg-white dark:bg-gray-800 sm:p-6 sm:pb-4">
+          <div class="sm:flex sm:items-start">
+            <div class="w-full mt-3 text-center sm:mt-0 sm:text-left">
+              <h3 class="text-lg font-medium leading-6 text-gray-900 dark:text-gray-100">Merged Merchant Details</h3>
+              <div class="mt-4 space-y-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Parent Merchant</label>
+                  <div class="p-2 mt-2 border rounded-lg bg-brand-50 dark:bg-brand-900/20 border-brand-200 dark:border-brand-800">
+                    <div class="flex items-center justify-between">
+                      <span class="font-medium text-gray-700 dark:text-gray-200">{{ viewingMerchant.name }}</span>
+                      <span
+                        class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium"
+                        :class="getCategoryClass(viewingMerchant.category)"
+                      >
+                        {{ viewingMerchant.category }}
+                      </span>
+                    </div>
+                    <div class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                      {{ viewingMerchant.transactionCount }} transactions
+                    </div>
+                  </div>
+                </div>
+                <div v-if="viewingMerchant.mergedMerchants && viewingMerchant.mergedMerchants.length > 0">
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Merged Merchants</label>
+                  <div class="mt-2 space-y-2">
+                    <div 
+                      v-for="merchant in viewingMerchant.mergedMerchants" 
+                      :key="merchant.id"
+                      class="p-2 rounded-lg bg-gray-50 dark:bg-gray-700"
+                    >
+                      <div class="flex items-center justify-between">
+                        <span class="text-gray-700 dark:text-gray-200">{{ merchant.name }}</span>
+                        <div class="flex items-center gap-2">
+                          <span
+                            class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium"
+                            :class="getCategoryClass(merchant.category)"
+                          >
+                            {{ merchant.category }}
+                          </span>
+                          <button
+                            @click="unmergeMerchant(merchant)"
+                            class="text-sm text-red-500 hover:text-red-700"
+                          >
+                            Unmerge
+                          </button>
+                        </div>
+                      </div>
+                      <div class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                        {{ merchant.transactionCount }} transactions
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="px-4 py-3 bg-gray-50 dark:bg-gray-700 sm:px-6 sm:flex sm:flex-row-reverse">
+          <button
+            type="button"
+            class="inline-flex justify-center w-full px-4 py-2 text-base font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-700"
+            @click="showViewModal = false"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script lang="ts">
@@ -221,6 +413,7 @@ interface Merchant {
   name: string
   transactionCount: number
   category: string
+  mergedMerchants?: Merchant[]
 }
 
 export default defineComponent({
@@ -249,6 +442,10 @@ export default defineComponent({
     ])
 
     const showEditModal = ref(false)
+    const showMergeModal = ref(false)
+    const selectedMerchants = ref<Merchant[]>([])
+    const availableMerchantsSearch = ref('')
+
     const editingMerchant = ref<Merchant>({
       id: '',
       name: '',
@@ -259,10 +456,10 @@ export default defineComponent({
     const filterMerchantName = ref('')
     const filterCategory = ref('')
 
-    const uniqueCategories = computed(() => Array.from(new Set(merchants.value.map(m => m.category))))
+    const uniqueCategories = computed(() => Array.from(new Set(merchants.value.map((m: Merchant) => m.category))))
 
     const filteredMerchants = computed(() => {
-      return merchants.value.filter(m =>
+      return merchants.value.filter((m: Merchant) =>
         (!filterMerchantName.value || m.name.toLowerCase().includes(filterMerchantName.value.toLowerCase())) &&
         (!filterCategory.value || m.category === filterCategory.value)
       )
@@ -287,8 +484,18 @@ export default defineComponent({
       return classes[category] || 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
     }
 
+    const showViewModal = ref(false)
+    const viewingMerchant = ref<Merchant>({
+      id: '',
+      name: '',
+      transactionCount: 0,
+      category: '',
+      mergedMerchants: []
+    })
+
     const viewMerchant = (merchant: Merchant): void => {
-      console.log('View merchant:', merchant)
+      viewingMerchant.value = { ...merchant }
+      showViewModal.value = true
     }
 
     const editMerchant = (merchant: Merchant): void => {
@@ -297,12 +504,106 @@ export default defineComponent({
     }
 
     const saveMerchant = (): void => {
-      const index = merchants.value.findIndex(m => m.id === editingMerchant.value.id)
+      const index = merchants.value.findIndex((m: Merchant) => m.id === editingMerchant.value.id)
       if (index !== -1) {
         merchants.value[index] = { ...editingMerchant.value }
         emit('update:merchants', merchants.value)
       }
       showEditModal.value = false
+    }
+
+    const selectForMerge = (merchant: Merchant): void => {
+      if (!selectedMerchants.value.find(m => m.id === merchant.id)) {
+        if (selectedMerchants.value.length === 0) {
+          // First merchant becomes the parent
+          selectedMerchants.value = [merchant]
+        } else {
+          // Add as child merchant
+          selectedMerchants.value.push(merchant)
+        }
+      }
+      showMergeModal.value = true
+    }
+
+    const removeFromMerge = (merchant: Merchant): void => {
+      selectedMerchants.value = selectedMerchants.value.filter(m => m.id !== merchant.id)
+      if (selectedMerchants.value.length === 0) {
+        closeMergeModal()
+      }
+    }
+
+    const closeMergeModal = (): void => {
+      showMergeModal.value = false
+      selectedMerchants.value = []
+      availableMerchantsSearch.value = ''
+    }
+
+    const mergeMerchants = (): void => {
+      if (selectedMerchants.value.length < 2) return
+
+      // Calculate total transaction count
+      const totalTransactions = selectedMerchants.value.reduce((sum, m) => sum + m.transactionCount, 0)
+
+      // Create new merged merchant using the first merchant's name and category
+      const mergedMerchant: Merchant = {
+        id: `MCH${Date.now()}`,
+        name: selectedMerchants.value[0].name,
+        transactionCount: totalTransactions,
+        category: selectedMerchants.value[0].category,
+        mergedMerchants: selectedMerchants.value.slice(1)
+      }
+
+      // Remove old merchants and add the merged one
+      const merchantIds = selectedMerchants.value.map(m => m.id)
+      merchants.value = merchants.value.filter(m => !merchantIds.includes(m.id))
+      merchants.value.push(mergedMerchant)
+
+      emit('update:merchants', merchants.value)
+      closeMergeModal()
+    }
+
+    const availableMerchants = computed(() => {
+      return merchants.value.filter(m => !selectedMerchants.value.some(selected => selected.id === m.id))
+    })
+
+    const filteredAvailableMerchants = computed(() => {
+      const search = availableMerchantsSearch.value.toLowerCase()
+      return availableMerchants.value.filter(merchant => 
+        merchant.name.toLowerCase().includes(search) ||
+        merchant.category.toLowerCase().includes(search)
+      )
+    })
+
+    const unmergeMerchant = (merchantToUnmerge: Merchant): void => {
+      // Find the parent merchant
+      const parentMerchant = merchants.value.find(m => 
+        m.mergedMerchants?.some(merged => merged.id === merchantToUnmerge.id)
+      )
+
+      if (parentMerchant) {
+        // Remove the merchant from mergedMerchants
+        parentMerchant.mergedMerchants = parentMerchant.mergedMerchants?.filter(
+          m => m.id !== merchantToUnmerge.id
+        )
+
+        // Update parent's transaction count
+        parentMerchant.transactionCount = parentMerchant.transactionCount - merchantToUnmerge.transactionCount
+
+        // Add the unmerged merchant back to the merchants list
+        merchants.value.push(merchantToUnmerge)
+
+        // Update the viewing merchant if it's the parent
+        if (viewingMerchant.value.id === parentMerchant.id) {
+          viewingMerchant.value = { ...parentMerchant }
+        }
+
+        // If no more merged merchants, remove the mergedMerchants property
+        if (parentMerchant.mergedMerchants?.length === 0) {
+          delete parentMerchant.mergedMerchants
+        }
+
+        emit('update:merchants', merchants.value)
+      }
     }
 
     return {
@@ -320,7 +621,19 @@ export default defineComponent({
       uniqueCategories,
       showEditModal,
       editingMerchant,
-      saveMerchant
+      saveMerchant,
+      showMergeModal,
+      selectedMerchants,
+      availableMerchants,
+      availableMerchantsSearch,
+      filteredAvailableMerchants,
+      selectForMerge,
+      removeFromMerge,
+      closeMergeModal,
+      mergeMerchants,
+      showViewModal,
+      viewingMerchant,
+      unmergeMerchant
     }
   }
 })

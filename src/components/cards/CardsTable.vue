@@ -1,45 +1,41 @@
 <template>
-  <div class="space-y-4 p-4">
+  <div class="p-4 space-y-4">
     <!-- Filters -->
-    <div class="flex flex-col gap-4 w-full">
-      <div class="flex gap-4 w-full">
-        <div class="flex flex-col gap-2 w-1/2">
-          <label for="filterCardName" class="text-theme-sm font-medium text-gray-700 dark:text-gray-200">Card Name</label>
+    <div class="flex flex-col w-full gap-4">
+      <div class="flex w-full gap-4">
+        <div class="flex flex-col w-1/2 gap-2">
+          <label for="filterCardName" class="font-medium text-gray-700 text-theme-sm dark:text-gray-200">Card Name</label>
           <input
             id="filterCardName"
             v-model="filterCardName"
             type="text"
             placeholder="Filter by Card Name"
-            class="form-control w-full"
+            class="w-full form-control"
           />
         </div>
-        <div class="flex flex-col gap-2 w-1/2">
-          <label for="filterUser" class="text-theme-sm font-medium text-gray-700 dark:text-gray-200">User</label>
+        <div class="flex flex-col w-1/2 gap-2">
+          <label for="filterUser" class="font-medium text-gray-700 text-theme-sm dark:text-gray-200">User</label>
           <input
             id="filterUser"
             v-model="filterUser"
             type="text"
             placeholder="Filter by User"
-            class="form-control w-full"
+            class="w-full form-control"
           />
         </div>
       </div>
-      <div class="flex gap-4 w-full">
-        <div class="flex flex-col gap-2 w-1/2">
-          <label for="filterType" class="text-theme-sm font-medium text-gray-700 dark:text-gray-200">Type</label>
-          <select id="filterType" v-model="filterType" class="form-control w-full">
-            <option value="">All Types</option>
-            <option v-for="type in uniqueTypes" :key="type" :value="type">{{ type }}</option>
-          </select>
+       <div class="flex w-full gap-4">
+        <div class="flex flex-col w-1/2 gap-2">
+           <label for="filterCardNumber" class="font-medium text-gray-700 text-theme-sm dark:text-gray-200">Card Number</label>
+          <input
+            id="filterCardNumber"
+            v-model="filterCardNumber"
+            type="text"
+            placeholder="Filter by Card Number"
+            class="w-full form-control"
+          />
         </div>
-        <div class="flex flex-col gap-2 w-1/2">
-          <label for="filterStatus" class="text-theme-sm font-medium text-gray-700 dark:text-gray-200">Status</label>
-          <select id="filterStatus" v-model="filterStatus" class="form-control w-full">
-            <option value="">All Statuses</option>
-            <option v-for="status in uniqueStatuses" :key="status" :value="status">{{ status }}</option>
-          </select>
-        </div>
-      </div>
+       </div>
     </div>
 
     <!-- Table -->
@@ -48,22 +44,19 @@
         <table class="min-w-full">
           <thead>
             <tr class="border-b border-gray-200 dark:border-gray-700">
-              <th class="px-5 py-3 text-left w-1/6 sm:px-6">
+              <th class="w-1/6 px-5 py-3 text-left sm:px-6">
                 <p class="font-medium text-gray-500 text-theme-xs dark:text-gray-400">Card Name</p>
               </th>
-              <th class="px-5 py-3 text-left w-1/6 sm:px-6">
+              <th class="w-1/6 px-5 py-3 text-left sm:px-6">
                 <p class="font-medium text-gray-500 text-theme-xs dark:text-gray-400">Card Number</p>
               </th>
-              <th class="px-5 py-3 text-left w-1/6 sm:px-6">
-                <p class="font-medium text-gray-500 text-theme-xs dark:text-gray-400">Type</p>
-              </th>
-              <th class="px-5 py-3 text-left w-1/6 sm:px-6">
-                <p class="font-medium text-gray-500 text-theme-xs dark:text-gray-400">Status</p>
-              </th>
-              <th class="px-5 py-3 text-left w-1/6 sm:px-6">
+              <th class="w-1/6 px-5 py-3 text-left sm:px-6">
                 <p class="font-medium text-gray-500 text-theme-xs dark:text-gray-400">User</p>
               </th>
-              <th class="px-5 py-3 text-left w-1/6 sm:px-6">
+              <th class="w-1/6 px-5 py-3 text-left sm:px-6">
+                <p class="font-medium text-gray-500 text-theme-xs dark:text-gray-400">Last transaction</p>
+              </th>
+              <th class="w-1/6 px-5 py-3 text-left sm:px-6">
                 <p class="font-medium text-gray-500 text-theme-xs dark:text-gray-400">Actions</p>
               </th>
             </tr>
@@ -74,7 +67,7 @@
               :key="card.id"
               class="border-t border-gray-100 dark:border-gray-800"
             >
-              <td class="px-5 py-4 sm:px-6 flex items-center gap-2">
+              <td class="flex items-center gap-2 px-5 py-4 sm:px-6">
                 <span v-if="card.type === 'mastercard'">
                   <!-- Mastercard SVG -->
                   <svg width="32" height="24" viewBox="0 0 32 24" fill="none">
@@ -95,25 +88,23 @@
               <td class="px-5 py-4 sm:px-6">
                 <span class="text-gray-500 text-theme-sm dark:text-gray-400">{{ card.number }}</span>
               </td>
+              
               <td class="px-5 py-4 sm:px-6">
-                <span class="text-gray-500 text-theme-sm dark:text-gray-400">{{ card.type }}</span>
+                <p class="text-gray-500 text-theme-sm dark:text-gray-400">@{{ card.user.toLowerCase().replace(/\s+/g, '') }}</p>
               </td>
               <td class="px-5 py-4 sm:px-6">
-                <span class="text-gray-500 text-theme-sm dark:text-gray-400">{{ card.status }}</span>
-              </td>
-              <td class="px-5 py-4 sm:px-6">
-                <span class="text-gray-500 text-theme-sm dark:text-gray-400">{{ card.user }}</span>
+                <p class="text-gray-500 text-theme-sm dark:text-gray-400">{{ card.lastTransaction }}</p>
               </td>
               <td class="px-5 py-4 sm:px-6">
                 <div class="flex items-center gap-2">
                   <button
-                    class="rounded-lg bg-brand-500 px-3 py-1 text-sm text-white hover:bg-brand-600"
+                    class="px-3 py-1 text-sm text-white rounded-lg bg-brand-500 hover:bg-brand-600"
                     @click="viewCard(card)"
                   >
                     View
                   </button>
                   <button
-                    class="rounded-lg bg-gray-100 px-3 py-1 text-sm text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                    class="px-3 py-1 text-sm text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
                     @click="editCard(card)"
                   >
                     Edit
@@ -127,19 +118,19 @@
     </div>
 
     <!-- Pagination -->
-    <div class="flex items-center justify-between border-t border-gray-200 px-4 py-3 sm:px-6">
-      <div class="flex flex-1 justify-between sm:hidden">
+    <div class="flex items-center justify-between px-4 py-3 border-t border-gray-200 sm:px-6">
+      <div class="flex justify-between flex-1 sm:hidden">
         <button
           @click="currentPage--"
           :disabled="currentPage === 1"
-          class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+          class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
         >
           Previous
         </button>
         <button
           @click="currentPage++"
           :disabled="currentPage === totalPages"
-          class="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+          class="relative inline-flex items-center px-4 py-2 ml-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
         >
           Next
         </button>
@@ -157,14 +148,14 @@
           </p>
         </div>
         <div>
-          <nav class="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
+          <nav class="inline-flex -space-x-px rounded-md shadow-sm isolate" aria-label="Pagination">
             <button
               @click="currentPage--"
               :disabled="currentPage === 1"
-              class="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
+              class="relative inline-flex items-center px-2 py-2 text-gray-400 rounded-l-md ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
             >
               <span class="sr-only">Previous</span>
-              <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+              <svg class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                 <path
                   fill-rule="evenodd"
                   d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z"
@@ -188,10 +179,10 @@
             <button
               @click="currentPage++"
               :disabled="currentPage === totalPages"
-              class="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
+              class="relative inline-flex items-center px-2 py-2 text-gray-400 rounded-r-md ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
             >
               <span class="sr-only">Next</span>
-              <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+              <svg class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                 <path
                   fill-rule="evenodd"
                   d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
@@ -207,7 +198,7 @@
 </template>
 
 <script lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, defineComponent } from 'vue'
 
 interface Card {
   id: string
@@ -216,9 +207,10 @@ interface Card {
   type: string
   status: string
   user: string
+  lastTransaction: string
 }
 
-export default {
+export default defineComponent({
   name: 'CardsTable',
   setup() {
     const cards = ref<Card[]>([
@@ -228,7 +220,8 @@ export default {
         number: '**7328',
         type: 'mastercard',
         status: 'Active',
-        user: 'John Doe'
+        user: 'John Doe',
+        lastTransaction: '2024-01-01'
       },
       {
         id: 'CARD002',
@@ -236,7 +229,8 @@ export default {
         number: '**7377',
         type: 'mastercard',
         status: 'Inactive',
-        user: 'Jane Smith'
+        user: 'Jane Smith',
+        lastTransaction: '2024-01-01'
       }
     ])
 
@@ -244,16 +238,18 @@ export default {
     const filterUser = ref('')
     const filterType = ref('')
     const filterStatus = ref('')
+    const filterCardNumber = ref('')
 
-    const uniqueTypes = computed(() => Array.from(new Set(cards.value.map(c => c.type))))
-    const uniqueStatuses = computed(() => Array.from(new Set(cards.value.map(c => c.status))))
+    const uniqueTypes = computed(() => Array.from(new Set(cards.value.map((c: Card) => c.type))))
+    const uniqueStatuses = computed(() => Array.from(new Set(cards.value.map((c: Card) => c.status))))
 
     const filteredCards = computed(() => {
-      return cards.value.filter(c =>
+      return cards.value.filter((c: Card) =>
         (!filterCardName.value || c.name.toLowerCase().includes(filterCardName.value.toLowerCase())) &&
         (!filterUser.value || c.user.toLowerCase().includes(filterUser.value.toLowerCase())) &&
         (!filterType.value || c.type === filterType.value) &&
-        (!filterStatus.value || c.status === filterStatus.value)
+        (!filterStatus.value || c.status === filterStatus.value) &&
+        (!filterCardNumber.value || c.number.includes(filterCardNumber.value))
       )
     })
 
@@ -265,10 +261,10 @@ export default {
     const endIndex = computed(() => Math.min(startIndex.value + itemsPerPage, filteredCards.value.length))
     const paginatedCards = computed(() => filteredCards.value.slice(startIndex.value, endIndex.value))
 
-    const viewCard = (card: Card) => {
+    const viewCard = (card: Card): void => {
       console.log('View card:', card)
     }
-    const editCard = (card: Card) => {
+    const editCard = (card: Card): void => {
       console.log('Edit card:', card)
     }
 
@@ -278,6 +274,7 @@ export default {
       filterUser,
       filterType,
       filterStatus,
+      filterCardNumber,
       uniqueTypes,
       uniqueStatuses,
       paginatedCards,
@@ -290,7 +287,7 @@ export default {
       editCard
     }
   }
-}
+})
 </script>
 
 <style scoped>

@@ -86,7 +86,19 @@
               </td>
               <td class="px-5 py-4 sm:px-6">
                 <div class="flex items-center justify-center w-8 h-8">
-                  <i :class="category.icon" class="text-xl"></i>
+                  <img 
+                    v-if="category.icon.startsWith('data:')" 
+                    :src="category.icon" 
+                    class="object-contain w-6 h-6"
+                    alt="Category icon"
+                  />
+                  <span 
+                    v-else-if="category.icon.match(/[\u{1F300}-\u{1F9FF}]/u)" 
+                    class="text-xl"
+                  >
+                    {{ category.icon }}
+                  </span>
+                  <i v-else :class="category.icon" class="text-xl"></i>
                 </div>
               </td>
               <td class="px-5 py-4 sm:px-6">
@@ -108,12 +120,7 @@
               </td>
               <td class="px-5 py-4 sm:px-6">
                 <div class="flex items-center gap-2">
-                  <button
-                    class="px-3 py-1 text-sm text-white rounded-lg bg-brand-500 hover:bg-brand-600"
-                    @click="viewCategory(category)"
-                  >
-                    View
-                  </button>
+                 
                   <button
                     class="px-3 py-1 text-sm text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
                     @click="editCategory(category)"
@@ -193,6 +200,239 @@
       </div>
     </div>
   </div>
+
+  <!-- Create Category Modal -->
+  <div v-if="showCreateModal" class="fixed inset-0 z-50 overflow-y-auto top-32">
+    <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+      <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+        <div class="absolute inset-0 bg-gray-500 opacity-75 dark:bg-gray-900"></div>
+      </div>
+      <div class="inline-block overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl dark:bg-gray-800 sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+        <div class="px-4 pt-5 pb-4 bg-white dark:bg-gray-800 sm:p-6 sm:pb-4">
+          <div class="sm:flex sm:items-start">
+            <div class="w-full mt-3 text-center sm:mt-0 sm:text-left">
+              <h3 class="text-lg font-medium leading-6 text-gray-900 dark:text-gray-100">Create New Category</h3>
+              <div class="mt-4 space-y-4">
+                <div>
+                  <label for="categoryName" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Category Name</label>
+                  <input
+                    type="text"
+                    id="categoryName"
+                    v-model="newCategory.name"
+                    class="w-full mt-1 form-control"
+                    placeholder="Enter category name"
+                  />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Category Icon</label>
+                  <div class="flex flex-col items-center gap-4 mt-2">
+                    <div 
+                      class="flex items-center justify-center w-24 h-24 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer dark:border-gray-600 hover:border-brand-500 dark:hover:border-brand-500"
+                      @click="triggerIconUpload"
+                    >
+                      <div v-if="!newCategory.icon || newCategory.icon.startsWith('fas fa-')" class="text-center">
+                        <i v-if="newCategory.icon" :class="newCategory.icon" class="text-4xl text-gray-400"></i>
+                        <svg v-else class="w-10 h-10 mx-auto text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        </svg>
+                        <span class="mt-1 text-xs text-gray-500 dark:text-gray-400">Upload Icon</span>
+                      </div>
+                      <img 
+                        v-else-if="newCategory.icon.startsWith('data:')" 
+                        :src="newCategory.icon" 
+                        class="object-contain w-20 h-20"
+                        alt="Category icon"
+                      />
+                      <span 
+                        v-else 
+                        class="text-4xl"
+                      >
+                        {{ newCategory.icon }}
+                      </span>
+                    </div>
+                    <input
+                      type="file"
+                      ref="iconInput"
+                      class="hidden"
+                      accept="image/*"
+                      @change="handleIconUpload"
+                    />
+                    <button
+                      v-if="newCategory.icon"
+                      @click="removeIcon"
+                      class="text-sm text-red-500 hover:text-red-700"
+                    >
+                      Remove Icon
+                    </button>
+                  </div>
+                </div>
+                <div>
+                  <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-200">Or Choose a Predefined Icon</label>
+                  <div class="grid grid-cols-6 gap-2 p-2 border border-gray-200 rounded-lg dark:border-gray-700">
+                    <button
+                      v-for="emoji in predefinedIcons"
+                      :key="emoji"
+                      @click="selectPredefinedIcon(emoji)"
+                      class="flex items-center justify-center w-10 h-10 text-2xl transition-colors rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+                      :class="{ 'bg-brand-50 dark:bg-brand-900/20': newCategory.icon === emoji }"
+                    >
+                      {{ emoji }}
+                    </button>
+                  </div>
+                </div>
+                <div>
+                  <label for="categoryStatus" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Status</label>
+                  <select
+                    id="categoryStatus"
+                    v-model="newCategory.status"
+                    class="w-full mt-1 form-control"
+                  >
+                    <option value="Active">Active</option>
+                    <option value="Inactive">Inactive</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="px-4 py-3 bg-gray-50 dark:bg-gray-700 sm:px-6 sm:flex sm:flex-row-reverse">
+          <button
+            type="button"
+            class="inline-flex justify-center w-full px-4 py-2 text-base font-medium text-white border border-transparent rounded-md shadow-sm bg-brand-500 hover:bg-brand-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 sm:ml-3 sm:w-auto sm:text-sm"
+            @click="saveCategory"
+            :disabled="!newCategory.name"
+          >
+            Create
+          </button>
+          <button
+            type="button"
+            class="inline-flex justify-center w-full px-4 py-2 mt-3 text-base font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-700"
+            @click="closeCreateModal"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Category Modal -->
+  <div v-if="showEditModal" class="fixed inset-0 z-50 overflow-y-auto top-32">
+    <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+      <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+        <div class="absolute inset-0 bg-gray-500 opacity-75 dark:bg-gray-900"></div>
+      </div>
+      <div class="inline-block overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl dark:bg-gray-800 sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+        <div class="px-4 pt-5 pb-4 bg-white dark:bg-gray-800 sm:p-6 sm:pb-4">
+          <div class="sm:flex sm:items-start">
+            <div class="w-full mt-3 text-center sm:mt-0 sm:text-left">
+              <h3 class="text-lg font-medium leading-6 text-gray-900 dark:text-gray-100">Edit Category</h3>
+              <div class="mt-4 space-y-4">
+                <div>
+                  <label for="editCategoryName" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Category Name</label>
+                  <input
+                    type="text"
+                    id="editCategoryName"
+                    v-model="editingCategory.name"
+                    class="w-full mt-1 form-control"
+                    placeholder="Enter category name"
+                  />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Category Icon</label>
+                  <div class="flex flex-col items-center gap-4 mt-2">
+                    <div 
+                      class="flex items-center justify-center w-24 h-24 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer dark:border-gray-600 hover:border-brand-500 dark:hover:border-brand-500"
+                      @click="triggerEditIconUpload"
+                    >
+                      <div v-if="!editingCategory.icon || editingCategory.icon.startsWith('fas fa-')" class="text-center">
+                        <i v-if="editingCategory.icon" :class="editingCategory.icon" class="text-4xl text-gray-400"></i>
+                        <svg v-else class="w-10 h-10 mx-auto text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        </svg>
+                        <span class="mt-1 text-xs text-gray-500 dark:text-gray-400">Upload Icon</span>
+                      </div>
+                      <img 
+                        v-else-if="editingCategory.icon.startsWith('data:')" 
+                        :src="editingCategory.icon" 
+                        class="object-contain w-20 h-20"
+                        alt="Category icon"
+                      />
+                      <span 
+                        v-else 
+                        class="text-4xl"
+                      >
+                        {{ editingCategory.icon }}
+                      </span>
+                    </div>
+                    <input
+                      type="file"
+                      ref="editIconInput"
+                      class="hidden"
+                      accept="image/*"
+                      @change="handleEditIconUpload"
+                    />
+                    <button
+                      v-if="editingCategory.icon"
+                      @click="removeEditIcon"
+                      class="text-sm text-red-500 hover:text-red-700"
+                    >
+                      Remove Icon
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Predefined Icons -->
+                <div>
+                  <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-200">Or Choose a Predefined Icon</label>
+                  <div class="grid grid-cols-6 gap-2 p-2 border border-gray-200 rounded-lg dark:border-gray-700">
+                    <button
+                      v-for="emoji in predefinedIcons"
+                      :key="emoji"
+                      @click="selectEditPredefinedIcon(emoji)"
+                      class="flex items-center justify-center w-10 h-10 text-2xl transition-colors rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+                      :class="{ 'bg-brand-50 dark:bg-brand-900/20': editingCategory.icon === emoji }"
+                    >
+                      {{ emoji }}
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <label for="editCategoryStatus" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Status</label>
+                  <select
+                    id="editCategoryStatus"
+                    v-model="editingCategory.status"
+                    class="w-full mt-1 form-control"
+                  >
+                    <option value="Active">Active</option>
+                    <option value="Inactive">Inactive</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="px-4 py-3 bg-gray-50 dark:bg-gray-700 sm:px-6 sm:flex sm:flex-row-reverse">
+          <button
+            type="button"
+            class="inline-flex justify-center w-full px-4 py-2 text-base font-medium text-white border border-transparent rounded-md shadow-sm bg-brand-500 hover:bg-brand-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 sm:ml-3 sm:w-auto sm:text-sm"
+            @click="updateCategory"
+            :disabled="!editingCategory.name"
+          >
+            Save Changes
+          </button>
+          <button
+            type="button"
+            class="inline-flex justify-center w-full px-4 py-2 mt-3 text-base font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-700"
+            @click="closeEditModal"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script lang="ts">
@@ -264,14 +504,142 @@ export default {
       console.log('View category:', category)
     }
 
+    const showEditModal = ref(false)
+    const editIconInput = ref<HTMLInputElement | null>(null)
+    const editingCategory = ref<Category>({
+      id: '',
+      icon: '',
+      name: '',
+      transactions: 0,
+      status: 'Active'
+    })
+
     const editCategory = (category: Category) => {
-      console.log('Edit category:', category)
+      editingCategory.value = { ...category }
+      showEditModal.value = true
     }
 
-    const createCategory = () => {
-      console.log('Create new category')
-      // Implement create category logic
+    const closeEditModal = () => {
+      showEditModal.value = false
+      editingCategory.value = {
+        id: '',
+        icon: '',
+        name: '',
+        transactions: 0,
+        status: 'Active'
+      }
     }
+
+    const triggerEditIconUpload = () => {
+      editIconInput.value?.click()
+    }
+
+    const handleEditIconUpload = (event: Event) => {
+      const target = event.target as HTMLInputElement
+      const file = target.files?.[0]
+      if (file) {
+        const reader = new FileReader()
+        reader.onload = (e) => {
+          editingCategory.value.icon = e.target?.result as string
+        }
+        reader.readAsDataURL(file)
+      }
+    }
+
+    const removeEditIcon = () => {
+      editingCategory.value.icon = 'fas fa-folder'
+      if (editIconInput.value) {
+        editIconInput.value.value = ''
+      }
+    }
+
+    const selectEditPredefinedIcon = (emoji: string) => {
+      editingCategory.value.icon = emoji
+    }
+
+    const updateCategory = () => {
+      if (!editingCategory.value.name) return
+
+      const index = categories.value.findIndex(c => c.id === editingCategory.value.id)
+      if (index !== -1) {
+        categories.value[index] = { ...editingCategory.value }
+      }
+      closeEditModal()
+    }
+
+    const showCreateModal = ref(false)
+    const iconInput = ref<HTMLInputElement | null>(null)
+    const newCategory = ref<Category>({
+      id: '',
+      icon: '',
+      name: '',
+      transactions: 0,
+      status: 'Active'
+    })
+
+    const createCategory = () => {
+      showCreateModal.value = true
+    }
+
+    const closeCreateModal = () => {
+      showCreateModal.value = false
+      newCategory.value = {
+        id: '',
+        icon: '',
+        name: '',
+        transactions: 0,
+        status: 'Active'
+      }
+    }
+
+    const triggerIconUpload = () => {
+      iconInput.value?.click()
+    }
+
+    const handleIconUpload = (event: Event) => {
+      const target = event.target as HTMLInputElement
+      const file = target.files?.[0]
+      if (file) {
+        const reader = new FileReader()
+        reader.onload = (e) => {
+          newCategory.value.icon = e.target?.result as string
+        }
+        reader.readAsDataURL(file)
+      }
+    }
+
+    const removeIcon = () => {
+      newCategory.value.icon = 'fas fa-folder'
+      if (iconInput.value) {
+        iconInput.value.value = ''
+      }
+    }
+
+    const selectPredefinedIcon = (emoji: string) => {
+      newCategory.value.icon = emoji
+    }
+
+    const saveCategory = () => {
+      if (!newCategory.value.name) return
+
+      const category: Category = {
+        id: `CAT${Date.now()}`,
+        icon: newCategory.value.icon || 'fas fa-folder', // Default icon if none selected
+        name: newCategory.value.name,
+        transactions: 0,
+        status: newCategory.value.status
+      }
+
+      categories.value.push(category)
+      closeCreateModal()
+    }
+
+    const predefinedIcons = [
+      '🛒', '🍔', '🚗', '🏠', '💼', '🎮',
+      '📱', '✈️', '🏥', '🎓', '🎁', '💳',
+      '🏋️', '🎨', '🎵', '📚', '🎬', '🏖️',
+      '🐾', '🌿', '💻', '📷', '🎪', '🎭'
+    ]
 
     return {
       categories,
@@ -286,7 +654,26 @@ export default {
       paginatedCategories,
       viewCategory,
       editCategory,
-      createCategory
+      showEditModal,
+      editingCategory,
+      editIconInput,
+      closeEditModal,
+      triggerEditIconUpload,
+      handleEditIconUpload,
+      removeEditIcon,
+      selectEditPredefinedIcon,
+      updateCategory,
+      showCreateModal,
+      newCategory,
+      iconInput,
+      createCategory,
+      closeCreateModal,
+      triggerIconUpload,
+      handleIconUpload,
+      removeIcon,
+      saveCategory,
+      predefinedIcons,
+      selectPredefinedIcon
     }
   }
 }
@@ -304,4 +691,4 @@ export default {
 .btn-primary {
   @apply bg-brand-500 text-white hover:bg-brand-600 focus:ring-2 focus:ring-brand-500/20;
 }
-</style> 
+</style>
