@@ -156,6 +156,61 @@
       </div>
     </div>
   </div>
+
+  <!-- Edit Merchant Modal -->
+  <div v-if="showEditModal" class="fixed inset-0 z-50 overflow-y-auto">
+    <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+      <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+        <div class="absolute inset-0 bg-gray-500 opacity-75 dark:bg-gray-900"></div>
+      </div>
+      <div class="inline-block overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl dark:bg-gray-800 sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+        <div class="px-4 pt-5 pb-4 bg-white dark:bg-gray-800 sm:p-6 sm:pb-4">
+          <div class="sm:flex sm:items-start">
+            <div class="w-full mt-3 text-center sm:mt-0 sm:text-left">
+              <h3 class="text-lg font-medium leading-6 text-gray-900 dark:text-gray-100">Edit Merchant</h3>
+              <div class="mt-4 space-y-4">
+                <div>
+                  <label for="editMerchantName" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Merchant Name</label>
+                  <input
+                    type="text"
+                    id="editMerchantName"
+                    v-model="editingMerchant.name"
+                    class="w-full mt-1 form-control"
+                  />
+                </div>
+                <div>
+                  <label for="editCategory" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Category</label>
+                  <select
+                    id="editCategory"
+                    v-model="editingMerchant.category"
+                    class="w-full mt-1 form-control"
+                  >
+                    <option v-for="cat in uniqueCategories" :key="cat" :value="cat">{{ cat }}</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="px-4 py-3 bg-gray-50 dark:bg-gray-700 sm:px-6 sm:flex sm:flex-row-reverse">
+          <button
+            type="button"
+            class="inline-flex justify-center w-full px-4 py-2 text-base font-medium text-white border border-transparent rounded-md shadow-sm bg-brand-500 hover:bg-brand-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 sm:ml-3 sm:w-auto sm:text-sm"
+            @click="saveMerchant"
+          >
+            Save
+          </button>
+          <button
+            type="button"
+            class="inline-flex justify-center w-full px-4 py-2 mt-3 text-base font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-700"
+            @click="showEditModal = false"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script lang="ts">
@@ -191,6 +246,14 @@ export default {
         category: 'Transportation'
       }
     ])
+
+    const showEditModal = ref(false)
+    const editingMerchant = ref<Merchant>({
+      id: '',
+      name: '',
+      transactionCount: 0,
+      category: ''
+    })
 
     const filterMerchantName = ref('')
     const filterCategory = ref('')
@@ -228,7 +291,16 @@ export default {
     }
 
     const editMerchant = (merchant: Merchant) => {
-      console.log('Edit merchant:', merchant)
+      editingMerchant.value = { ...merchant }
+      showEditModal.value = true
+    }
+
+    const saveMerchant = () => {
+      const index = merchants.value.findIndex(m => m.id === editingMerchant.value.id)
+      if (index !== -1) {
+        merchants.value[index] = { ...editingMerchant.value }
+      }
+      showEditModal.value = false
     }
 
     return {
@@ -243,7 +315,10 @@ export default {
       editMerchant,
       filterMerchantName,
       filterCategory,
-      uniqueCategories
+      uniqueCategories,
+      showEditModal,
+      editingMerchant,
+      saveMerchant
     }
   }
 }

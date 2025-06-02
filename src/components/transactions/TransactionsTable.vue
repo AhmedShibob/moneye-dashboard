@@ -1,43 +1,40 @@
 <template>
-  <div class="space-y-4  p-4">
+  <div class="p-4 space-y-4">
     
-        <div class="flex flex-col gap-4 w-full ">
-          <div class="flex gap-4 w-full">
-            <div class="flex flex-col gap-2 w-1/2">
-              <label for="filterUserId" class="text-theme-sm font-medium text-gray-700 dark:text-gray-200">User ID</label>
+        <div class="flex flex-col w-full gap-4 ">
+          <div class="flex w-full gap-4">
+            <div class="flex flex-col w-1/2 gap-2">
+              <label for="filterUserId" class="font-medium text-gray-700 text-theme-sm dark:text-gray-200">User ID</label>
               <input
                 id="filterUserId"
                 v-model="filterUserId"
                 type="text"
                 placeholder="Filter by User ID"
-                class="form-control w-full"
+                class="w-full form-control"
               />
             </div>
-            <div class="flex flex-col gap-2 w-1/2">
-              <label for="filterMerchant" class="text-theme-sm font-medium text-gray-700 dark:text-gray-200">Merchant</label>
-              <input
-                id="filterMerchant"
-                v-model="filterMerchant"
-                type="text"
-                placeholder="Filter by Merchant"
-                class="form-control w-full"
-              />
+            <div class="flex flex-col w-1/2 gap-2">
+              <label for="filterMerchant" class="font-medium text-gray-700 text-theme-sm dark:text-gray-200">Merchant</label>
+              <select id="filterMerchant" v-model="filterMerchant" class="w-full form-control">
+                <option value="">All Merchants</option>
+                <option v-for="merchant in uniqueMerchants" :key="merchant" :value="merchant">{{ merchant }}</option>
+              </select>
             </div>
           </div>
           <div class="flex gap-4">
-            <div class="flex flex-col gap-2 w-1/2">
-              <label for="filterCard" class="text-theme-sm font-medium text-gray-700 dark:text-gray-200">Card</label>
+            <div class="flex flex-col w-1/2 gap-2">
+              <label for="filterCard" class="font-medium text-gray-700 text-theme-sm dark:text-gray-200">Card</label>
               <input
                 id="filterCard"
                 v-model="filterCard"
                 type="text"
                 placeholder="Filter by Card"
-                class="form-control w-full"
+                class="w-full form-control"
               />
             </div>
-            <div class="flex flex-col gap-2 w-1/2">
-              <label for="filterCategory" class="text-theme-sm font-medium text-gray-700 dark:text-gray-200">Category</label>
-              <select id="filterCategory" v-model="filterCategory" class="form-control w-full">
+            <div class="flex flex-col w-1/2 gap-2">
+              <label for="filterCategory" class="font-medium text-gray-700 text-theme-sm dark:text-gray-200">Category</label>
+              <select id="filterCategory" v-model="filterCategory" class="w-full form-control">
                 <option value="">All Categories</option>
                 <option v-for="cat in uniqueCategories" :key="cat" :value="cat">{{ cat }}</option>
               </select>
@@ -53,18 +50,20 @@
         <table class="min-w-full">
           <thead>
             <tr class="border-b border-gray-200 dark:border-gray-700">
-              <th class="px-5 py-3 text-left w-1/8 sm:px-6">
-                <p class="font-medium text-gray-500 text-theme-xs dark:text-gray-400">Transaction ID</p>
-              </th>
+            
               <th class="px-5 py-3 text-left w-1/8 sm:px-6">
                 <p class="font-medium text-gray-500 text-theme-xs dark:text-gray-400">User</p>
+              </th>
+               <th class="px-5 py-3 text-left w-1/8 sm:px-6">
+                <p class="font-medium text-gray-500 text-theme-xs dark:text-gray-400">Date</p>
+              </th>
+               <th class="px-5 py-3 text-left w-1/8 sm:px-6">
+                <p class="font-medium text-gray-500 text-theme-xs dark:text-gray-400">Card</p>
               </th>
               <th class="px-5 py-3 text-left w-1/8 sm:px-6">
                 <p class="font-medium text-gray-500 text-theme-xs dark:text-gray-400">Merchant</p>
               </th>
-              <th class="px-5 py-3 text-left w-1/8 sm:px-6">
-                <p class="font-medium text-gray-500 text-theme-xs dark:text-gray-400">Card</p>
-              </th>
+             
               <th class="px-5 py-3 text-left w-1/8 sm:px-6">
                 <p class="font-medium text-gray-500 text-theme-xs dark:text-gray-400">Amount</p>
               </th>
@@ -72,8 +71,9 @@
                 <p class="font-medium text-gray-500 text-theme-xs dark:text-gray-400">Category</p>
               </th>
               <th class="px-5 py-3 text-left w-1/8 sm:px-6">
-                <p class="font-medium text-gray-500 text-theme-xs dark:text-gray-400">Date</p>
+                <p class="font-medium text-gray-500 text-theme-xs dark:text-gray-400">Status</p>
               </th>
+             
               <th class="px-5 py-3 text-left w-1/8 sm:px-6">
                 <p class="font-medium text-gray-500 text-theme-xs dark:text-gray-400">Actions</p>
               </th>
@@ -85,35 +85,22 @@
               :key="transaction.id"
               class="border-t border-gray-100 dark:border-gray-800"
             >
+              
               <td class="px-5 py-4 sm:px-6">
-                <p class="text-gray-500 text-theme-sm dark:text-gray-400">{{ transaction.id }}</p>
+                <p class="text-gray-500 text-theme-sm dark:text-gray-400">@{{ transaction.user.toLowerCase().replace(/\s+/g, '') }}</p>
               </td>
               <td class="px-5 py-4 sm:px-6">
-                <p class="text-gray-500 text-theme-sm dark:text-gray-400">{{ transaction.user }}</p>
+                <p class="text-gray-500 text-theme-sm dark:text-gray-400">{{ transaction.date }}</p>
+              </td>
+               <td class="flex items-center gap-2 px-5 py-4 sm:px-6">
+              
+                <span class="ml-2 text-gray-500 text-theme-sm dark:text-gray-400">{{ transaction.cardName }}</span>
+                <span class="ml-2 text-gray-500 text-theme-sm dark:text-gray-400">{{ transaction.card }}</span>
               </td>
               <td class="px-5 py-4 sm:px-6">
                 <p class="text-gray-500 text-theme-sm dark:text-gray-400">{{ transaction.merchant }}</p>
               </td>
-              <td class="px-5 py-4 sm:px-6 flex items-center gap-2">
-                <span v-if="transaction.cardType === 'mastercard'">
-                  <!-- Inline SVG for Mastercard -->
-                  <svg width="32" height="24" viewBox="0 0 32 24" fill="none">
-                    <rect width="32" height="24" rx="6" fill="#23272F"/>
-                    <circle cx="13" cy="12" r="6" fill="#EB001B"/>
-                    <circle cx="19" cy="12" r="6" fill="#F79E1B"/>
-                    <circle cx="16" cy="12" r="6" fill="#FF5F00"/>
-                  </svg>
-                </span>
-                <span v-else-if="transaction.cardType === 'visa'">
-                  <!-- Inline SVG for Visa (add your SVG here) -->
-                  <svg width="32" height="24" viewBox="0 0 32 24" fill="none">
-                    <rect width="32" height="24" rx="6" fill="#23272F"/>
-                    <!-- Add Visa logo SVG here -->
-                  </svg>
-                </span>
-                <span class="ml-2 text-gray-500 text-theme-sm dark:text-gray-400">{{ transaction.cardName }}</span>
-                <span class="ml-2 text-gray-500 text-theme-sm dark:text-gray-400">{{ transaction.card }}</span>
-              </td>
+             
               <td class="px-5 py-4 sm:px-6">
                 <p class="text-gray-500 text-theme-sm dark:text-gray-400">${{ transaction.amount }}</p>
               </td>
@@ -126,18 +113,24 @@
                 </span>
               </td>
               <td class="px-5 py-4 sm:px-6">
-                <p class="text-gray-500 text-theme-sm dark:text-gray-400">{{ transaction.date }}</p>
+                <span
+                  class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium"
+                  :class="getStatusClass(transaction.status)"
+                >
+                  {{ transaction.status }}
+                </span>
               </td>
+              
               <td class="px-5 py-4 sm:px-6">
                 <div class="flex items-center gap-2">
                   <button
-                    class="rounded-lg bg-brand-500 px-3 py-1 text-sm text-white hover:bg-brand-600"
+                    class="px-3 py-1 text-sm text-white rounded-lg bg-brand-500 hover:bg-brand-600"
                     @click="viewTransaction(transaction)"
                   >
                     View
                   </button>
                   <button
-                    class="rounded-lg bg-gray-100 px-3 py-1 text-sm text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                    class="px-3 py-1 text-sm text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
                     @click="editTransaction(transaction)"
                   >
                     Edit
@@ -151,19 +144,19 @@
     </div>
 
     <!-- Pagination -->
-    <div class="flex items-center justify-between border-t border-gray-200 px-4 py-3 sm:px-6">
-      <div class="flex flex-1 justify-between sm:hidden">
+    <div class="flex items-center justify-between px-4 py-3 border-t border-gray-200 sm:px-6">
+      <div class="flex justify-between flex-1 sm:hidden">
         <button
           @click="currentPage--"
           :disabled="currentPage === 1"
-          class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+          class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
         >
           Previous
         </button>
         <button
           @click="currentPage++"
           :disabled="currentPage === totalPages"
-          class="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+          class="relative inline-flex items-center px-4 py-2 ml-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
         >
           Next
         </button>
@@ -181,14 +174,14 @@
           </p>
         </div>
         <div>
-          <nav class="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
+          <nav class="inline-flex -space-x-px rounded-md shadow-sm isolate" aria-label="Pagination">
             <button
               @click="currentPage--"
               :disabled="currentPage === 1"
-              class="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
+              class="relative inline-flex items-center px-2 py-2 text-gray-400 rounded-l-md ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
             >
               <span class="sr-only">Previous</span>
-              <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+              <svg class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                 <path
                   fill-rule="evenodd"
                   d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z"
@@ -212,10 +205,10 @@
             <button
               @click="currentPage++"
               :disabled="currentPage === totalPages"
-              class="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
+              class="relative inline-flex items-center px-2 py-2 text-gray-400 rounded-r-md ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
             >
               <span class="sr-only">Next</span>
-              <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+              <svg class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                 <path
                   fill-rule="evenodd"
                   d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
@@ -243,6 +236,7 @@ interface Transaction {
   amount: number
   category: string
   date: string
+  status: string
 }
 
 export default {
@@ -259,6 +253,7 @@ export default {
         amount: 99.99,
         category: 'Shopping',
         date: '2024-03-15',
+        status: 'Completed'
       },
       {
         id: 'TRX002',
@@ -270,6 +265,7 @@ export default {
         amount: 4.99,
         category: 'Food & Drink',
         date: '2024-03-14',
+        status: 'Pending'
       },
     ])
 
@@ -283,6 +279,10 @@ export default {
 
     const uniqueCategories = computed(() => {
       return Array.from(new Set(transactions.value.map(t => t.category)));
+    });
+
+    const uniqueMerchants = computed(() => {
+      return Array.from(new Set(transactions.value.map(t => t.merchant)));
     });
 
     const filteredTransactions = computed(() => {
@@ -312,6 +312,16 @@ export default {
       return classes[category as keyof typeof classes] || 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
     }
 
+    const getStatusClass = (status: string) => {
+      const classes = {
+        'Completed': 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
+        'Pending': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
+        'Failed': 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
+        'Refunded': 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
+      }
+      return classes[status as keyof typeof classes] || 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
+    }
+
     const viewTransaction = (transaction: Transaction) => {
       console.log('View transaction:', transaction)
     }
@@ -328,13 +338,15 @@ export default {
       endIndex,
       paginatedTransactions,
       getCategoryClass,
+      getStatusClass,
       viewTransaction,
       editTransaction,
       filterUserId,
       filterMerchant,
       filterCard,
       filterCategory,
-      uniqueCategories
+      uniqueCategories,
+      uniqueMerchants
     }
   }
 }

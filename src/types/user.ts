@@ -4,4 +4,5 @@ export interface User {
   transactions: number
   cards: number
   joinDate: string
+  lastTransaction: string
 } 

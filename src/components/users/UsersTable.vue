@@ -18,22 +18,25 @@
         <table class="min-w-full">
           <thead>
             <tr class="border-b border-gray-200 dark:border-gray-700">
-              <th class="px-5 py-3 text-left w-1/6 sm:px-6">
+              <th class="w-1/6 px-5 py-3 text-left sm:px-6">
                 <p class="font-medium text-gray-500 text-theme-xs dark:text-gray-400">User ID</p>
               </th>
-              <th class="px-5 py-3 text-left w-1/6 sm:px-6">
+              <th class="w-1/6 px-5 py-3 text-left sm:px-6">
                 <p class="font-medium text-gray-500 text-theme-xs dark:text-gray-400">Phone</p>
               </th>
-              <th class="px-5 py-3 text-left w-1/6 sm:px-6">
+              <th class="w-1/6 px-5 py-3 text-left sm:px-6">
                 <p class="font-medium text-gray-500 text-theme-xs dark:text-gray-400">Transactions</p>
               </th>
-              <th class="px-5 py-3 text-left w-1/6 sm:px-6">
+              <th class="w-1/6 px-5 py-3 text-left sm:px-6">
                 <p class="font-medium text-gray-500 text-theme-xs dark:text-gray-400">Cards</p>
               </th>
-              <th class="px-5 py-3 text-left w-1/6 sm:px-6">
+              <th class="w-1/6 px-5 py-3 text-left sm:px-6">
                 <p class="font-medium text-gray-500 text-theme-xs dark:text-gray-400">Join Date</p>
               </th>
-              <th class="px-5 py-3 text-left w-1/6 sm:px-6">
+              <th class="w-1/6 px-5 py-3 text-left sm:px-6">
+                <p class="font-medium text-gray-500 text-theme-xs dark:text-gray-400">Last Transaction</p>
+              </th>
+              <th class="w-1/6 px-5 py-3 text-left sm:px-6">
                 <p class="font-medium text-gray-500 text-theme-xs dark:text-gray-400">Actions</p>
               </th>
             </tr>
@@ -45,7 +48,7 @@
               class="border-t border-gray-100 dark:border-gray-800"
             >
               <td class="px-5 py-4 sm:px-6">
-                <p class="text-gray-500 text-theme-sm dark:text-gray-400">{{ user.id }}</p>
+                <p class="text-gray-500 text-theme-sm dark:text-gray-400">@{{ user.id.toLowerCase().replace(/\s+/g, '') }}</p>
               </td>
               <td class="px-5 py-4 sm:px-6">
                 <p class="text-gray-500 text-theme-sm dark:text-gray-400">{{ user.phone }}</p>
@@ -60,15 +63,18 @@
                 <p class="text-gray-500 text-theme-sm dark:text-gray-400">{{ user.joinDate }}</p>
               </td>
               <td class="px-5 py-4 sm:px-6">
+                <p class="text-gray-500 text-theme-sm dark:text-gray-400">{{ user.lastTransaction }}</p>
+              </td>
+              <td class="px-5 py-4 sm:px-6">
                 <div class="flex items-center gap-2">
                   <button
-                    class="rounded-lg bg-brand-500 px-3 py-1 text-sm text-white hover:bg-brand-600"
+                    class="px-3 py-1 text-sm text-white rounded-lg bg-brand-500 hover:bg-brand-600"
                     @click="viewUser(user)"
                   >
                     View
                   </button>
                   <button
-                    class="rounded-lg bg-gray-100 px-3 py-1 text-sm text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                    class="px-3 py-1 text-sm text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
                     @click="editUser(user)"
                   >
                     Edit
@@ -82,19 +88,19 @@
     </div>
 
     <!-- Pagination -->
-    <div class="flex items-center justify-between border-t border-gray-200 px-4 py-3 sm:px-6">
-      <div class="flex flex-1 justify-between sm:hidden">
+    <div class="flex items-center justify-between px-4 py-3 border-t border-gray-200 sm:px-6">
+      <div class="flex justify-between flex-1 sm:hidden">
         <button
           @click="currentPage--"
           :disabled="currentPage === 1"
-          class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+          class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
         >
           Previous
         </button>
         <button
           @click="currentPage++"
           :disabled="currentPage === totalPages"
-          class="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+          class="relative inline-flex items-center px-4 py-2 ml-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
         >
           Next
         </button>
@@ -112,14 +118,14 @@
           </p>
         </div>
         <div>
-          <nav class="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
+          <nav class="inline-flex -space-x-px rounded-md shadow-sm isolate" aria-label="Pagination">
             <button
               @click="currentPage--"
               :disabled="currentPage === 1"
-              class="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
+              class="relative inline-flex items-center px-2 py-2 text-gray-400 rounded-l-md ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
             >
               <span class="sr-only">Previous</span>
-              <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+              <svg class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                 <path
                   fill-rule="evenodd"
                   d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z"
@@ -143,10 +149,10 @@
             <button
               @click="currentPage++"
               :disabled="currentPage === totalPages"
-              class="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
+              class="relative inline-flex items-center px-2 py-2 text-gray-400 rounded-r-md ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
             >
               <span class="sr-only">Next</span>
-              <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+              <svg class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                 <path
                   fill-rule="evenodd"
                   d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
@@ -176,6 +182,7 @@ const users = ref<User[]>([
     transactions: 15,
     cards: 2,
     joinDate: '2024-01-15',
+    lastTransaction: '2024-01-15',
   },
   {
     id: 'USR002',
@@ -183,6 +190,7 @@ const users = ref<User[]>([
     transactions: 8,
     cards: 1,
     joinDate: '2024-02-01',
+    lastTransaction: '2024-01-15',
   },
   {
     id: 'USR003',
@@ -190,6 +198,7 @@ const users = ref<User[]>([
     transactions: 23,
     cards: 3,
     joinDate: '2024-02-15',
+    lastTransaction: '2024-01-15',
   },
   // Add more sample data as needed
 ])
