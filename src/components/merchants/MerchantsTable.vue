@@ -226,7 +226,7 @@ interface Merchant {
 export default defineComponent({
   name: 'MerchantsTable',
   emits: ['update:merchants'],
-  setup(props, { emit }) {
+  setup(_, { emit }) {
     const merchants = ref<Merchant[]>([
       {
         id: 'MCH001',
